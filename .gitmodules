@@ -1,0 +1,3 @@
+[submodule "sahi/YOLOv6"]
+	path = sahi/YOLOv6
+	url = https://github.com/meituan/YOLOv6.git
