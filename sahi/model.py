@@ -186,7 +186,7 @@ class DetectionModel:
 
     @property
     def object_prediction_list(self):
-        if len(self._object_prediction_list_per_image[0]):
+        if len(self._object_prediction_list_per_image):
             return self._object_prediction_list_per_image[0]
         return self._object_prediction_list_per_image
 
