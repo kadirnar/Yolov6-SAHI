@@ -30,7 +30,7 @@ import torch
 from YOLOv6.yolov6.layers.common import DetectBackend
 from YOLOv6.yolov6.utils.nms import non_max_suppression
 logger = logging.getLogger(__name__)
-from yolo6 import precess_image, COCO_CLASSES, check_img_size
+from yolo6 import precess_image, check_img_size
 
 class DetectionModel:
     def __init__(
@@ -1095,6 +1095,13 @@ class Yolov6DetectionModel(DetectionModel):
         if self.device != 'cpu':
             self.model(torch.zeros(1, 3, *self.image_size).to(self.device).type_as(next(self.model.model.parameters())))  # warmup
         
+        # set category_mapping
+        from sahi.utils.torchvision import COCO_CLASSES
+        
+        if self.category_mapping is None:
+            category_names = {str(i): COCO_CLASSES[i] for i in range(len(COCO_CLASSES))}
+            self.category_mapping = category_names
+            
     def perform_inference(self, image: np.ndarray):
         img, self.img_shape, self.src_shape = precess_image(image, img_size=self.image_size, stride=self.stride)
         
@@ -1123,7 +1130,7 @@ class Yolov6DetectionModel(DetectionModel):
             det[:, :4] = Inferer.rescale(self.img_shape, det[:, :4], self.src_shape).round()
             for *xyxy, conf, cls in reversed(det): 
                 category_id = int(cls)
-                category_name = COCO_CLASSES[category_id]
+                category_name = self.category_mapping[str(category_id)]
                 score = float(conf.cpu().numpy())
                 bbox = [int(xyxy[0]), int(xyxy[1]), int(xyxy[2]), int(xyxy[3])]
                 object_prediction = ObjectPrediction(
